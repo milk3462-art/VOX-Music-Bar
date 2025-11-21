@@ -363,8 +363,9 @@
                 cardContainer.style.transitionDelay = `${index * 50}ms`;
 
                 // Card HTML
+                // Added -webkit-mask-image to prevent rounded corners from breaking when child image scales on hover
                 cardContainer.innerHTML = `
-                    <div class="tilt-card relative group cursor-pointer rounded-2xl bg-[#141414] border border-white/5 hover:border-gold/30 h-full flex flex-col overflow-hidden shadow-lg hover:shadow-gold/10 transition-transform duration-200 ease-out will-change-transform">
+                    <div class="tilt-card relative group cursor-pointer rounded-2xl bg-[#141414] border border-white/5 hover:border-gold/30 h-full flex flex-col overflow-hidden shadow-lg hover:shadow-gold/10 transition-transform duration-200 ease-out will-change-transform" style="-webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black);">
                         <!-- Shine -->
                         <div class="shine-effect absolute inset-0 pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl z-10 mix-blend-overlay"></div>
                         
@@ -434,21 +435,8 @@
                 }
             });
 
-            // Touch support for simple effect
-            card.addEventListener('touchmove', (e) => {
-                 if (e.touches.length === 1) {
-                    const rect = card.getBoundingClientRect();
-                    const width = rect.width;
-                    const height = rect.height;
-                    const mouseX = e.touches[0].clientX - rect.left;
-                    const mouseY = e.touches[0].clientY - rect.top;
-                    const xPct = mouseX / width - 0.5;
-                    const yPct = mouseY / height - 0.5;
-                    const rotateX = yPct * -intensity;
-                    const rotateY = xPct * intensity;
-                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-                 }
-            });
+            // Note: 'touchmove' listener is intentionally omitted to prevent conflict 
+            // between card tilt and page scrolling on mobile devices.
 
             const reset = () => {
                 card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
@@ -482,7 +470,7 @@
                 const englishLabel = FLAVOR_LABELS[key] || key;
                 let iconsHtml = '';
                 
-                // Just show the active score (no empty placeholders)
+                // Just show the active score
                 for(let i = 0; i < value; i++) {
                     iconsHtml += `<span class="material-symbols-outlined text-gold text-xl">mic</span>`;
                 }
@@ -493,7 +481,8 @@
                             <span class="text-gray-300 text-sm font-medium tracking-wider">${key}</span>
                             <span class="text-[10px] text-gray-500 uppercase">${englishLabel}</span>
                         </div>
-                        <div class="flex items-center gap-1">
+                        <!-- Fixed width container (w-40) aligned to start (justify-start) so icons grow from left-to-right -->
+                        <div class="flex items-center justify-start gap-1 w-40 flex-nowrap">
                             ${iconsHtml}
                         </div>
                     </div>
